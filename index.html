@@ -11,13 +11,13 @@
     body { display: flex; flex-direction: column; }
     header { background: var(--primary); color: #fff; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 48px; flex-shrink: 0; }
     h1 { font-size: 1.2rem; }
-    .nav-btn { background: rgba(255,255,255,0.25); color: #fff; border: 1px solid rgba(255,255,255,0.5); padding: 5px 14px; border-radius: 18px; font-weight: bold; font-size: 0.95rem; cursor: pointer; }
+    .nav-btn { background: rgba(255,255,255,0.25); color: #fff; border: 1px solid rgba(255,255,255,0.5); padding: 6px 16px; border-radius: 18px; font-weight: bold; font-size: 1rem; cursor: pointer; }
     
     .screen { display: none; width: 100%; height: calc(100vh - 48px); flex-direction: column; position: absolute; top: 48px; left: 0; background: var(--bg); }
     .screen.active { display: flex; }
     
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; flex: 1; padding: 10px; min-height: 0; }
-    .card { background: #fff; border-radius: 14px; box-shadow: 0 3px 8px rgba(0,0,0,0.06); border: 3px solid transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px; position: relative; height: 100%; cursor: pointer; min-height: 0; }
+    .card { background: #fff; border-radius: 14px; box-shadow: 0 3px 8px rgba(0,0,0,0.06); border: 3px solid transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px; position: relative; height: 100%; cursor: pointer; min-height: 0; overflow: hidden; }
     .card[data-id="1"] { background: #ffe5ec; border-color: #ffb3c6; }
     .card[data-id="2"] { background: #f3e8ff; border-color: #d8b4fe; }
     .card[data-id="3"] { background: #fef9c3; border-color: #fde047; }
@@ -25,18 +25,26 @@
     .card[data-id="5"] { background: #ffedd5; border-color: #fdba74; }
     .card[data-id="6"] { background: #e0f2fe; border-color: #7dd3fc; }
     .card.has-count { border-width: 4px; }
-    .badge { position: absolute; top: -6px; right: -6px; background: var(--accent); color: #fff; font-size: 1.3rem; font-weight: bold; width: 36px; height: 36px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 3px solid #fff; z-index: 10; pointer-events: none; }
+    .badge { position: absolute; top: 4px; right: 4px; background: var(--accent); color: #fff; font-size: 1.3rem; font-weight: bold; width: 36px; height: 36px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 3px solid #fff; z-index: 10; pointer-events: none; }
     .card.has-count .badge { display: flex; }
     
-    .card-icon { font-size: min(8vh, 3.2rem); line-height: 1.1; margin-bottom: 2px; pointer-events: none; }
-    .card-title { font-size: min(2.5vh, 1.15rem); font-weight: bold; pointer-events: none; text-align: center; }
-    .card-price { font-size: min(2.2vh, 1rem); color: #444; font-weight: bold; pointer-events: none; margin-top: 2px; }
+    .card-img-wrapper { width: 100%; height: 55%; display: flex; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 4px; border-radius: 8px; pointer-events: none; }
+    .card-img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+    .card-icon { font-size: min(8vh, 3.2rem); line-height: 1.1; pointer-events: none; }
+    
+    .card-title { font-size: min(2.3vh, 1.15rem); font-weight: bold; pointer-events: none; text-align: center; }
+    .card-price { font-size: min(2vh, 1rem); color: #444; font-weight: bold; pointer-events: none; margin-top: 2px; }
 
-    .bottom { height: 58px; padding: 0 10px 10px; display: flex; justify-content: flex-end; flex-shrink: 0; }
-    .btn-ok { background: var(--success); color: #fff; border: none; padding: 0 30px; height: 100%; border-radius: 14px; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    /* 合計欄を拡大して右下に配置 */
+    .bottom { height: 68px; padding: 0 12px 10px; display: flex; justify-content: flex-end; flex-shrink: 0; }
+    .btn-ok { background: var(--success); color: #fff; border: none; padding: 0 40px; height: 100%; border-radius: 16px; font-size: 1.8rem; font-weight: bold; display: flex; align-items: center; gap: 15px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
     .btn-ok * { pointer-events: none; }
     
-    .checkout { justify-content: center; align-items: center; padding: 20px; background: #fff; text-align: center; }
+    /* お支払い画面：完了ボタンを左下に配置 */
+    .checkout { position: relative; padding: 30px; background: #fff; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+    .checkout-center { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .checkout-bottom-left { width: 100%; display: flex; justify-content: flex-start; padding: 10px; }
+    .btn-comp { background: var(--primary); color: #fff; border: none; padding: 22px 70px; border-radius: 20px; font-size: 2.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
   </style>
 </head>
 <body>
@@ -53,12 +61,12 @@
   </div>
 
   <div id="c" class="screen checkout">
-    <div style="margin-bottom: 30px;">
-      <div style="font-size:2rem;color:#555;">お支払い金額</div>
-      <div id="ct" style="font-size:4.8rem;font-weight:bold;color:var(--primary);margin:15px 0;">0円</div>
+    <div class="checkout-center">
+      <div style="font-size:2.4rem;color:#555;">お支払い金額</div>
+      <div id="ct" style="font-size:5.5rem;font-weight:bold;color:var(--primary);margin:15px 0;">0円</div>
     </div>
-    <div>
-      <button style="background:var(--primary);color:#fff;border:none;padding:18px 60px;border-radius:18px;font-size:2rem;font-weight:bold;cursor:pointer;" id="comp-btn">完了</button>
+    <div class="checkout-bottom-left">
+      <button class="btn-comp" id="comp-btn">完了</button>
     </div>
   </div>
 
@@ -75,13 +83,14 @@
   </div>
 
   <script>
+    /* 商品データ（画像データ & イラスト） */
     var p=[
-      {id:'1',n:'シュシュ・箸袋',p:100,c:0,s:0,i:'🎀'},
-      {id:'2',n:'サシェ',p:100,c:0,s:0,i:'🌸'},
-      {id:'3',n:'カレンダー',p:150,c:0,s:0,i:'📅'},
-      {id:'4',n:'クッション',p:300,c:0,s:0,i:'🛋️'},
-      {id:'5',n:'正月飾り',p:250,c:0,s:0,i:'🎍'},
-      {id:'6',n:'クリスマスリース',p:150,c:0,s:0,i:'🎄'}
+      {id:'1',n:'シュシュ・箸袋',p:100,c:0,s:0,img:'https://hoihoi1235.github.io/pos/shushu.jpg',type:'img'},
+      {id:'2',n:'サシェ',p:100,c:0,s:0,i:'🌸',type:'icon'},
+      {id:'3',n:'カレンダー',p:150,c:0,s:0,i:'📅',type:'icon'},
+      {id:'4',n:'クッション',p:300,c:0,s:0,img:'https://hoihoi1235.github.io/pos/cushion.jpg',type:'img'},
+      {id:'5',n:'正月飾り',p:250,c:0,s:0,img:'https://hoihoi1235.github.io/pos/shogatsu.jpg',type:'img'},
+      {id:'6',n:'クリスマスリース',p:150,c:0,s:0,img:'https://hoihoi1235.github.io/pos/wreath.jpg',type:'img'}
     ];
     
     function r(){
@@ -108,7 +117,14 @@
           d.addEventListener('pointerdown',st,false);
           d.addEventListener('pointerup',en,false);
           
-          d.innerHTML='<div class="badge">'+x.c+'</div><div class="card-icon">'+x.i+'</div><div class="card-title">'+x.n+'</div><div class="card-price">'+x.p+'円</div>';
+          var contentHtml = '';
+          if(x.type==='img'){
+            contentHtml = '<div class="card-img-wrapper"><img src="'+x.img+'" class="card-img" alt="'+x.n+'"></div>';
+          } else {
+            contentHtml = '<div class="card-img-wrapper"><div class="card-icon">'+x.i+'</div></div>';
+          }
+          
+          d.innerHTML='<div class="badge">'+x.c+'</div>'+contentHtml+'<div class="card-title">'+x.n+'</div><div class="card-price">'+x.p+'円</div>';
           g.appendChild(d);
         })(i);
       }
