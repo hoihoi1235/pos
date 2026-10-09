@@ -31,8 +31,7 @@
     .card.has-count .badge { display: flex; }
     
     .card-img-wrapper { width: 100%; height: 55%; display: flex; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 4px; border-radius: 8px; pointer-events: none; }
-    .card-img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-    .card-icon { font-size: min(8vh, 3.2rem); line-height: 1.1; pointer-events: none; }
+    .card-img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
     
     .card-title { font-size: min(2.3vh, 1.15rem); font-weight: bold; pointer-events: none; text-align: center; }
     .card-price { font-size: min(2vh, 1rem); color: #444; font-weight: bold; pointer-events: none; margin-top: 2px; }
@@ -42,7 +41,7 @@
     .btn-ok { background: var(--success); color: #fff; border: none; padding: 0 40px; height: 100%; border-radius: 16px; font-size: 1.8rem; font-weight: bold; display: flex; align-items: center; gap: 15px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
     .btn-ok * { pointer-events: none; }
     
-    /* お支払い画面：背景完全不透明＆左下完了ボタン */
+    /* お支払い画面：全面表示＆左下完了ボタン */
     .checkout { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 20px 30px; background: #ffffff; z-index: 50; display: none; flex-direction: column; justify-content: space-between; align-items: center; }
     .checkout.active { display: flex; }
     .checkout-center { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
@@ -88,27 +87,15 @@
   </div>
 
   <script>
-    /* 送っていただいた実物写真データをHTMLキャンバス経由で最適化して埋め込み */
+    /* 全6商品の画像指定（拡張子違い（.png / .jpg）も自動対応） */
     var p=[
-      {id:'1',n:'シュシュ・箸袋',p:100,c:0,s:0,img:'https://hoihoi1235.github.io/pos/shushu.jpg',type:'img'},
-      {id:'2',n:'サシェ',p:100,c:0,s:0,i:'🌸',type:'icon'},
-      {id:'3',n:'カレンダー',p:150,c:0,s:0,i:'📅',type:'icon'},
-      {id:'4',n:'クッション',p:300,c:0,s:0,img:'https://hoihoi1235.github.io/pos/cushion.jpg',type:'img'},
-      {id:'5',n:'正月飾り',p:250,c:0,s:0,img:'https://hoihoi1235.github.io/pos/shogatsu.jpg',type:'img'},
-      {id:'6',n:'クリスマスリース',p:150,c:0,s:0,img:'https://hoihoi1235.github.io/pos/wreath.jpg',type:'img'}
+      {id:'1',n:'シュシュ・箸袋',p:100,c:0,s:0,img:'shushu'},
+      {id:'2',n:'サシェ',p:100,c:0,s:0,img:'sachet'},
+      {id:'3',n:'カレンダー',p:150,c:0,s:0,img:'calendar'},
+      {id:'4',n:'クッション',p:300,c:0,s:0,img:'cushion'},
+      {id:'5',n:'正月飾り',p:250,c:0,s:0,img:'shogatsu'},
+      {id:'6',n:'クリスマスリース',p:150,c:0,s:0,img:'wreath'}
     ];
-
-    /* 画像を表示用キャンバスで動的フォールバック描画（確実に実物写真を画面に出す処理） */
-    var loadedImgs = {};
-    function loadUserImages() {
-      var imgData = {
-        '1': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="100%" height="100%" fill="%23fce4ec"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="20" fill="%23d81b60">🎀 シュシュ・箸袋</text></svg>',
-        '4': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="100%" height="100%" fill="%23e8f5e9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="20" fill="%232e7d32">🛋️ クッション</text></svg>',
-        '5': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="100%" height="100%" fill="%23fff3e0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="20" fill="%23e65100">🎍 正月飾り</text></svg>',
-        '6': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="100%" height="100%" fill="%23e0f7fa"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="20" fill="%2300838f">🎄 クリスマスリース</text></svg>'
-      };
-      return imgData;
-    }
     
     function r(){
       var g=document.getElementById('g'); if(!g)return; g.innerHTML='';
@@ -134,14 +121,12 @@
           d.addEventListener('pointerdown',st,false);
           d.addEventListener('pointerup',en,false);
           
-          var contentHtml = '';
-          if(x.type==='img'){
-            contentHtml = '<div class="card-img-wrapper"><img src="'+x.img+'" class="card-img" alt="'+x.n+'"></div>';
-          } else {
-            contentHtml = '<div class="card-img-wrapper"><div class="card-icon">'+x.i+'</div></div>';
-          }
+          var imgHtml = '<div class="card-img-wrapper">' +
+            '<img src="' + x.img + '.jpg" class="card-img" alt="' + x.n + '" ' +
+            'onerror="this.onerror=null; this.src=\'' + x.img + '.png\';">' +
+            '</div>';
           
-          d.innerHTML='<div class="badge">'+x.c+'</div>'+contentHtml+'<div class="card-title">'+x.n+'</div><div class="card-price">'+x.p+'円</div>';
+          d.innerHTML='<div class="badge">'+x.c+'</div>'+imgHtml+'<div class="card-title">'+x.n+'</div><div class="card-price">'+x.p+'円</div>';
           g.appendChild(d);
         })(i);
       }
