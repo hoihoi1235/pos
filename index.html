@@ -31,7 +31,7 @@
     .card.has-count .badge { display: flex; }
     
     .card-img-wrapper { width: 100%; height: 55%; display: flex; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 4px; border-radius: 8px; pointer-events: none; }
-    .card-img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+    .card-img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
     
     .card-title { font-size: min(2.3vh, 1.15rem); font-weight: bold; pointer-events: none; text-align: center; }
     .card-price { font-size: min(2vh, 1rem); color: #444; font-weight: bold; pointer-events: none; margin-top: 2px; }
@@ -87,14 +87,14 @@
   </div>
 
   <script>
-    /* 全6商品の画像指定（拡張子違い（.png / .jpg）も自動対応） */
+    /* ご指定いただいた画像ファイル名と商品の正確な対応関係 */
     var p=[
-      {id:'1',n:'シュシュ・箸袋',p:100,c:0,s:0,img:'shushu'},
-      {id:'2',n:'サシェ',p:100,c:0,s:0,img:'sachet'},
-      {id:'3',n:'カレンダー',p:150,c:0,s:0,img:'calendar'},
-      {id:'4',n:'クッション',p:300,c:0,s:0,img:'cushion'},
-      {id:'5',n:'正月飾り',p:250,c:0,s:0,img:'shogatsu'},
-      {id:'6',n:'クリスマスリース',p:150,c:0,s:0,img:'wreath'}
+      {id:'1',n:'シュシュ・箸袋',p:100,c:0,s:0,img:'IMG_7701.jpeg'},
+      {id:'2',n:'サシェ',p:100,c:0,s:0,img:'IMG_9943.png'},
+      {id:'3',n:'カレンダー',p:150,c:0,s:0,img:'IMG_9944.png'},
+      {id:'4',n:'クッション',p:300,c:0,s:0,img:'IMG_2113.jpeg'},
+      {id:'5',n:'正月飾り',p:250,c:0,s:0,img:'IMG_2110.jpeg'},
+      {id:'6',n:'クリスマスリース',p:150,c:0,s:0,img:'IMG_2109.jpeg'}
     ];
     
     function r(){
@@ -121,10 +121,7 @@
           d.addEventListener('pointerdown',st,false);
           d.addEventListener('pointerup',en,false);
           
-          var imgHtml = '<div class="card-img-wrapper">' +
-            '<img src="' + x.img + '.jpg" class="card-img" alt="' + x.n + '" ' +
-            'onerror="this.onerror=null; this.src=\'' + x.img + '.png\';">' +
-            '</div>';
+          var imgHtml = '<div class="card-img-wrapper"><img src="' + x.img + '" class="card-img" alt="' + x.n + '"></div>';
           
           d.innerHTML='<div class="badge">'+x.c+'</div>'+imgHtml+'<div class="card-title">'+x.n+'</div><div class="card-price">'+x.p+'円</div>';
           g.appendChild(d);
