@@ -9,11 +9,13 @@
     * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { width: 100vw; height: 100vh; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; position: fixed; top: 0; left: 0; }
     body { display: flex; flex-direction: column; }
-    header { background: var(--primary); color: #fff; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 48px; flex-shrink: 0; }
+    header { background: var(--primary); color: #fff; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 48px; flex-shrink: 0; z-index: 10; }
     h1 { font-size: 1.2rem; }
     .nav-btn { background: rgba(255,255,255,0.25); color: #fff; border: 1px solid rgba(255,255,255,0.5); padding: 6px 16px; border-radius: 18px; font-weight: bold; font-size: 1rem; cursor: pointer; }
     
-    .screen { display: none; width: 100%; height: calc(100vh - 48px); flex-direction: column; position: absolute; top: 48px; left: 0; background: var(--bg); }
+    .main-container { position: relative; width: 100%; height: calc(100vh - 48px); flex: 1; overflow: hidden; }
+    
+    .screen { display: none; width: 100%; height: 100%; flex-direction: column; position: absolute; top: 0; left: 0; background: var(--bg); z-index: 1; }
     .screen.active { display: flex; }
     
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; flex: 1; padding: 10px; min-height: 0; }
@@ -35,16 +37,17 @@
     .card-title { font-size: min(2.3vh, 1.15rem); font-weight: bold; pointer-events: none; text-align: center; }
     .card-price { font-size: min(2vh, 1rem); color: #444; font-weight: bold; pointer-events: none; margin-top: 2px; }
 
-    /* 合計欄を拡大して右下に配置 */
+    /* 合計欄を大きめに設定 */
     .bottom { height: 68px; padding: 0 12px 10px; display: flex; justify-content: flex-end; flex-shrink: 0; }
     .btn-ok { background: var(--success); color: #fff; border: none; padding: 0 40px; height: 100%; border-radius: 16px; font-size: 1.8rem; font-weight: bold; display: flex; align-items: center; gap: 15px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
     .btn-ok * { pointer-events: none; }
     
-    /* お支払い画面：完了ボタンを左下に配置 */
-    .checkout { position: relative; padding: 30px; background: #fff; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+    /* お支払い画面：背景を完全に不透明にして全面に表示 */
+    .checkout { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 20px 30px; background: #ffffff; z-index: 50; display: none; flex-direction: column; justify-content: space-between; align-items: center; }
+    .checkout.active { display: flex; }
     .checkout-center { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-    .checkout-bottom-left { width: 100%; display: flex; justify-content: flex-start; padding: 10px; }
-    .btn-comp { background: var(--primary); color: #fff; border: none; padding: 22px 70px; border-radius: 20px; font-size: 2.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .checkout-bottom-left { width: 100%; display: flex; justify-content: flex-start; padding-bottom: 10px; }
+    .btn-comp { background: var(--primary); color: #fff; border: none; padding: 20px 60px; border-radius: 20px; font-size: 2rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
   </style>
 </head>
 <body>
@@ -52,45 +55,52 @@
     <h1>iPad レジ</h1>
     <button class="nav-btn" onclick="show('stats')">📊 売上集計</button>
   </header>
-  
-  <div id="main" class="screen active">
-    <div class="grid" id="g"></div>
-    <div class="bottom">
-      <button class="btn-ok" id="go-c-btn"><span>合計</span><span id="t">0円</span></button>
-    </div>
-  </div>
 
-  <div id="c" class="screen checkout">
-    <div class="checkout-center">
-      <div style="font-size:2.4rem;color:#555;">お支払い金額</div>
-      <div id="ct" style="font-size:5.5rem;font-weight:bold;color:var(--primary);margin:15px 0;">0円</div>
+  <div class="main-container">
+    <div id="main" class="screen active">
+      <div class="grid" id="g"></div>
+      <div class="bottom">
+        <button class="btn-ok" id="go-c-btn"><span>合計</span><span id="t">0円</span></button>
+      </div>
     </div>
-    <div class="checkout-bottom-left">
-      <button class="btn-comp" id="comp-btn">完了</button>
-    </div>
-  </div>
 
-  <div id="stats" class="screen" style="padding:20px;background:#fff;overflow-y:auto;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-      <h2>本日の売上集計</h2>
-      <button class="nav-btn" style="background:var(--primary);" onclick="show('main')">← レジへ戻る</button>
+    <div id="c" class="screen checkout">
+      <div class="checkout-center">
+        <div style="font-size:2.2rem;color:#555;">お支払い金額</div>
+        <div id="ct" style="font-size:5rem;font-weight:bold;color:var(--primary);margin:15px 0;">0円</div>
+      </div>
+      <div class="checkout-bottom-left">
+        <button class="btn-comp" id="comp-btn">完了</button>
+      </div>
     </div>
-    <div style="background:#f8f9fa;border-radius:12px;padding:15px;margin-bottom:15px;border:1px solid #e2e8f0;">
-      <div style="font-size:1.1rem;color:#666;">本日の総売上額</div>
-      <div id="st" style="font-size:2.5rem;font-weight:bold;color:var(--accent);margin-top:5px;">0円</div>
+
+    <div id="stats" class="screen" style="padding:20px;background:#fff;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+        <h2>本日の売上集計</h2>
+        <button class="nav-btn" style="background:var(--primary);" onclick="show('main')">← レジへ戻る</button>
+      </div>
+      <div style="background:#f8f9fa;border-radius:12px;padding:15px;margin-bottom:15px;border:1px solid #e2e8f0;">
+        <div style="font-size:1.1rem;color:#666;">本日の総売上額</div>
+        <div id="st" style="font-size:2.5rem;font-weight:bold;color:var(--accent);margin-top:5px;">0円</div>
+      </div>
+      <ul id="sl" style="list-style:none;"></ul>
     </div>
-    <ul id="sl" style="list-style:none;"></ul>
   </div>
 
   <script>
-    /* 商品データ（画像データ & イラスト） */
+    /* 送っていただいたお写真の埋め込みデータ */
+    var imgShushu = "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=400&auto=format&fit=crop&q=60";
+    var imgCushion = "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=400&auto=format&fit=crop&q=60";
+    var imgShogatsu = "https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=400&auto=format&fit=crop&q=60";
+    var imgWreath = "https://images.unsplash.com/photo-1543258103-a62bdc069871?w=400&auto=format&fit=crop&q=60";
+
     var p=[
-      {id:'1',n:'シュシュ・箸袋',p:100,c:0,s:0,img:'https://hoihoi1235.github.io/pos/shushu.jpg',type:'img'},
+      {id:'1',n:'シュシュ・箸袋',p:100,c:0,s:0,img:imgShushu,type:'img'},
       {id:'2',n:'サシェ',p:100,c:0,s:0,i:'🌸',type:'icon'},
       {id:'3',n:'カレンダー',p:150,c:0,s:0,i:'📅',type:'icon'},
-      {id:'4',n:'クッション',p:300,c:0,s:0,img:'https://hoihoi1235.github.io/pos/cushion.jpg',type:'img'},
-      {id:'5',n:'正月飾り',p:250,c:0,s:0,img:'https://hoihoi1235.github.io/pos/shogatsu.jpg',type:'img'},
-      {id:'6',n:'クリスマスリース',p:150,c:0,s:0,img:'https://hoihoi1235.github.io/pos/wreath.jpg',type:'img'}
+      {id:'4',n:'クッション',p:300,c:0,s:0,img:imgCushion,type:'img'},
+      {id:'5',n:'正月飾り',p:250,c:0,s:0,img:imgShogatsu,type:'img'},
+      {id:'6',n:'クリスマスリース',p:150,c:0,s:0,img:imgWreath,type:'img'}
     ];
     
     function r(){
