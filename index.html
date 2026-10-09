@@ -6,14 +6,13 @@
   <title>iPad レジ</title>
   <style>
     :root { --primary: #4a6fa5; --accent: #ff6b6b; --success: #2ec4b6; --bg: #f4f7f6; --text: #2b2d42; }
-    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: sans-serif; overflow: hidden; }
-    body { display: flex; flex-direction: column; }
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+    body { display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
     header { background: var(--primary); color: #fff; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 50px; flex-shrink: 0; }
     h1 { font-size: 1.3rem; }
     .nav-btn { background: rgba(255,255,255,0.25); color: #fff; border: 1px solid rgba(255,255,255,0.5); padding: 6px 16px; border-radius: 18px; font-weight: bold; font-size: 1rem; cursor: pointer; }
     
-    /* 6個のボタンが大きく画面いっぱいに並ぶ設定 */
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 12px; flex: 1; padding: 12px; min-height: 0; }
     .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); border: 4px solid transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; position: relative; height: 100%; cursor: pointer; min-height: 0; }
     .card[data-id="1"] { background: #ffe5ec; border-color: #ffb3c6; }
@@ -23,16 +22,16 @@
     .card[data-id="5"] { background: #ffedd5; border-color: #fdba74; }
     .card[data-id="6"] { background: #e0f2fe; border-color: #7dd3fc; }
     .card.has-count { border-width: 5px; }
-    .badge { position: absolute; top: -8px; right: -8px; background: var(--accent); color: #fff; font-size: 1.4rem; font-weight: bold; width: 38px; height: 38px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 3px solid #fff; z-index: 10; }
+    .badge { position: absolute; top: -8px; right: -8px; background: var(--accent); color: #fff; font-size: 1.4rem; font-weight: bold; width: 38px; height: 38px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 3px solid #fff; z-index: 10; pointer-events: none; }
     .card.has-count .badge { display: flex; }
     
-    /* 文字とアイコンを大きくくっきり表示 */
     .card-icon { font-size: min(10vh, 3.8rem); line-height: 1.1; margin-bottom: 4px; pointer-events: none; }
     .card-title { font-size: min(3vh, 1.3rem); font-weight: bold; pointer-events: none; text-align: center; }
     .card-price { font-size: min(2.6vh, 1.15rem); color: #444; font-weight: bold; pointer-events: none; margin-top: 2px; }
 
     .bottom { height: 65px; padding: 0 12px 12px; display: flex; justify-content: flex-end; flex-shrink: 0; }
-    .btn-ok { background: var(--success); color: #fff; border: none; padding: 0 35px; height: 100%; border-radius: 16px; font-size: 1.6rem; font-weight: bold; display: flex; align-items: center; gap: 15px; cursor: pointer; }
+    .btn-ok { background: var(--success); color: #fff; border: none; padding: 0 35px; height: 100%; border-radius: 16px; font-size: 1.6rem; font-weight: bold; display: flex; align-items: center; gap: 15px; cursor: pointer; pointer-events: auto; }
+    .btn-ok * { pointer-events: none; }
     
     .screen { display: none; height: 100%; flex-direction: column; }
     .active { display: flex; }
@@ -48,7 +47,7 @@
   <div id="main" class="screen active" style="flex:1;display:flex;flex-direction:column;">
     <div class="grid" id="g"></div>
     <div class="bottom">
-      <button class="btn-ok" onclick="goC()"><span>合計</span><span id="t">0円</span></button>
+      <button class="btn-ok" id="go-c-btn"><span>合計</span><span id="t">0円</span></button>
     </div>
   </div>
 
@@ -58,7 +57,7 @@
       <div id="ct" style="font-size:5rem;font-weight:bold;color:var(--primary);margin:15px 0;">0円</div>
     </div>
     <div>
-      <button style="background:var(--primary);color:#fff;border:none;padding:18px 60px;border-radius:18px;font-size:2rem;font-weight:bold;cursor:pointer;" onclick="comp()">完了</button>
+      <button style="background:var(--primary);color:#fff;border:none;padding:18px 60px;border-radius:18px;font-size:2rem;font-weight:bold;cursor:pointer;" id="comp-btn">完了</button>
     </div>
   </div>
 
@@ -83,6 +82,7 @@
       {id:'5',n:'正月飾り',p:250,c:0,s:0,i:'🎍'},
       {id:'6',n:'クリスマスリース',p:150,c:0,s:0,i:'🎄'}
     ];
+    
     function r(){
       var g=document.getElementById('g'); if(!g)return; g.innerHTML='';
       for(var i=0;i<p.length;i++){
@@ -90,23 +90,92 @@
           var x=p[idx]; var d=document.createElement('div');
           d.className='card'+(x.c>0?' has-count':''); d.setAttribute('data-id',x.id);
           var timer,isLong=false;
-          function st(e){if(e&&e.preventDefault)e.preventDefault();isLong=false;if(timer)clearTimeout(timer);timer=setTimeout(function(){isLong=true;if(x.c>0){x.c--;r();}},500);}
-          function en(e){if(e&&e.preventDefault)e.preventDefault();if(timer)clearTimeout(timer);if(!isLong){x.c++;r();}}
-          d.addEventListener('touchstart',st,false); d.addEventListener('touchend',en,false);
-          d.onmousedown=st; d.onmouseup=en;
+          
+          function st(e){
+            isLong=false;
+            if(timer)clearTimeout(timer);
+            timer=setTimeout(function(){
+              isLong=true;
+              if(x.c>0){x.c--;r();}
+            },500);
+          }
+          function en(e){
+            if(timer)clearTimeout(timer);
+            if(!isLong){x.c++;r();}
+          }
+          
+          d.addEventListener('pointerdown',st,false);
+          d.addEventListener('pointerup',en,false);
+          
           d.innerHTML='<div class="badge">'+x.c+'</div><div class="card-icon">'+x.i+'</div><div class="card-title">'+x.n+'</div><div class="card-price">'+x.p+'円</div>';
           g.appendChild(d);
         })(i);
       }
       document.getElementById('t').innerText=tot()+'円';
     }
+
     function tot(){var s=0;for(var i=0;i<p.length;i++)s+=p[i].p*p[i].c;return s;}
-    function show(s){var sc=document.querySelectorAll('.screen');for(var i=0;i<sc.length;i++)sc[i].classList.remove('active');var target=document.getElementById(s);if(target)target.classList.add('active');if(s==='stats')upS();}
-    function goC(){var t=tot();if(!t)return;document.getElementById('ct').innerText=t+'円';show('c');sp(t+'円になります');}
-    function comp(){sp('お買い上げありがとうございました');for(var i=0;i<p.length;i++){p[i].s+=p[i].c;p[i].c=0;}r();setTimeout(function(){show('main');},1000);}
-    function upS(){var gt=0,h='';for(var i=0;i<p.length;i++){var t=p[i].p*p[i].s;gt+=t;h+='<li style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee;font-size:1.2rem;"><span>'+p[i].n+' ('+p[i].p+'円)</span><span><b>'+p[i].s+'個</b> ('+t+'円)</span></li>';}document.getElementById('st').innerText=gt+'円';document.getElementById('sl').innerHTML=h;}
-    function sp(t){try{if('speechSynthesis'in window){speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';u.rate=0.9;u.pitch=1.2;speechSynthesis.speak(u);}}catch(e){}}
-    window.onload=r;
+    
+    function show(s){
+      var sc=document.querySelectorAll('.screen');
+      for(var i=0;i<sc.length;i++)sc[i].classList.remove('active');
+      var target=document.getElementById(s);
+      if(target)target.classList.add('active');
+      if(s==='stats')upS();
+    }
+
+    function goC(){
+      var t=tot();
+      if(!t)return;
+      document.getElementById('ct').innerText=t+'円';
+      show('c');
+      sp(t+'円になります');
+    }
+
+    function comp(){
+      sp('お買い上げありがとうございました');
+      for(var i=0;i<p.length;i++){p[i].s+=p[i].c;p[i].c=0;}
+      r();
+      setTimeout(function(){show('main');},1000);
+    }
+
+    function upS(){
+      var gt=0,h='';
+      for(var i=0;i<p.length;i++){
+        var t=p[i].p*p[i].s;
+        gt+=t;
+        h+='<li style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee;font-size:1.2rem;"><span>'+p[i].n+' ('+p[i].p+'円)</span><span><b>'+p[i].s+'個</b> ('+t+'円)</span></li>';
+      }
+      document.getElementById('st').innerText=gt+'円';
+      document.getElementById('sl').innerHTML=h;
+    }
+
+    function sp(t){
+      try{
+        if('speechSynthesis'in window){
+          speechSynthesis.cancel();
+          var u=new SpeechSynthesisUtterance(t);
+          u.lang='ja-JP';
+          u.rate=0.9;
+          u.pitch=1.2;
+          speechSynthesis.speak(u);
+        }
+      }catch(e){}
+    }
+
+    window.onload=function(){
+      r();
+      var btn=document.getElementById('go-c-btn');
+      if(btn){
+        btn.addEventListener('click',goC);
+        btn.addEventListener('touchend',function(e){ e.preventDefault(); goC(); });
+      }
+      var cBtn=document.getElementById('comp-btn');
+      if(cBtn){
+        cBtn.addEventListener('click',comp);
+        cBtn.addEventListener('touchend',function(e){ e.preventDefault(); comp(); });
+      }
+    };
   </script>
 </body>
 </html>
